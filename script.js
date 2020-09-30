@@ -1,53 +1,48 @@
-/* global d3 */
-/* eslint-disable max-len */
-
-// eslint-disable-next-line no-unused-vars
-const projectName = 'bar-chart';
-
-// coded by @Christian-Paul
-
-var width = 800,
+let width = 800,
   height = 400,
   barWidth = width / 275;
 
-var tooltip = d3
+  //this is the little box than comes up when you put your mouse
+let tooltip = d3
   .select('.visHolder')
   .append('div')
   .attr('id', 'tooltip')
   .style('opacity', 0);
-
-var overlay = d3
+//this is the white bar that covers the blue line your are on
+let overlay = d3
   .select('.visHolder')
   .append('div')
   .attr('class', 'overlay')
   .style('opacity', 0);
-
-var svgContainer = d3
+//this is the main svg container
+let svgContainer = d3
   .select('.visHolder')
   .append('svg')
   .attr('width', width + 100)
   .attr('height', height + 60);
-
+//here json will fetch data which it will pass into the function
 d3.json(
   'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json',
-  function (e, data) {
+  function (data) {
+    //adding the text for 'Gross Domestic Product'
     svgContainer
       .append('text')
       .attr('transform', 'rotate(-90)')
       .attr('x', -200)
       .attr('y', 80)
       .text('Gross Domestic Product');
-
+    //adding text for more info at the bottom
     svgContainer
       .append('text')
       .attr('x', width / 2 + 120)
       .attr('y', height + 50)
       .text('More Information: http://www.bea.gov/national/pdf/nipaguid.pdf')
       .attr('class', 'info');
-
-    var years = data.data.map(function (item) {
-      var quarter;
-      var temp = item[0].substring(5, 7);
+//here item is every is each array with date and gdp
+    let years = data.data.map(function (item) {
+      let quarter;
+      //temp is the month(there are only 4 months so 4 quaters)
+      let temp = item[0].substring(5, 7);
 
       if (temp === '01') {
         quarter = 'Q1';
@@ -58,46 +53,50 @@ d3.json(
       } else if (temp === '10') {
         quarter = 'Q4';
       }
-
+      // so years returns the date and the quarter
       return item[0].substring(0, 4) + ' ' + quarter;
     });
-
-    var yearsDate = data.data.map(function (item) {
+    //get eah date in the formal format
+    let yearsDate = data.data.map(function (item) {
       return new Date(item[0]);
     });
-
-    var xMax = new Date(d3.max(yearsDate));
+    // xMax is the last date 
+    let xMax = new Date(d3.max(yearsDate));
+    //not sure about this line adding-removing it doesnt do much
     xMax.setMonth(xMax.getMonth() + 3);
-    var xScale = d3
+   // scaleTIme() alligns the different dates with a scale of time
+   // so domain is the min year from yearsDate (above) and xMax is the maxDate(above)
+    let xScale = d3
       .scaleTime()
       .domain([d3.min(yearsDate), xMax])
       .range([0, width]);
-
-    var xAxis = d3.axisBottom().scale(xScale);
-
-    svgContainer
+//for the bottom xAxis scaled to x
+    let xAxis = d3.axisBottom().scale(xScale);
+// appending the xAxis to the svgcontainer
+//the transform property places it in the bottom center (60 is too push a bit too right, 400 is to be a the bottom)
+    svgContainer 
       .append('g')
       .call(xAxis)
       .attr('id', 'x-axis')
       .attr('transform', 'translate(60, 400)');
-
-    var GDP = data.data.map(function (item) {
+// gets the gdp of each array
+    let GDP = data.data.map(function (item) {
       return item[1];
     });
 
-    var scaledGDP = [];
-
-    var gdpMax = d3.max(GDP);
-
-    var linearScale = d3.scaleLinear().domain([0, gdpMax]).range([0, height]);
+    let scaledGDP = [];
+//max gdp
+    let gdpMax = d3.max(GDP);
+//linearScale 
+    let linearScale = d3.scaleLinear().domain([0, gdpMax]).range([0, height]);
 
     scaledGDP = GDP.map(function (item) {
       return linearScale(item);
     });
+console.log(scaledGDP)
+    let yAxisScale = d3.scaleLinear().domain([0, gdpMax]).range([height, 0]);
 
-    var yAxisScale = d3.scaleLinear().domain([0, gdpMax]).range([height, 0]);
-
-    var yAxis = d3.axisLeft(yAxisScale);
+    let yAxis = d3.axisLeft(yAxisScale);
 
     svgContainer
       .append('g')
@@ -132,7 +131,7 @@ d3.json(
       .on('mouseover', function (d, i) {
         overlay
           .transition()
-          .duration(0)
+          .duration(1)
           .style('height', d + 'px')
           .style('width', barWidth + 'px')
           .style('opacity', 0.9)
