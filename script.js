@@ -125,34 +125,40 @@ d3.json(
       .attr('transform', 'translate(60, 0)');
 
      //this is to add all the bars(rect) to the svg
+     //(d) is the data so the number and (i) is the index
     d3.select('svg')
       .selectAll('rect')
-      .data(scaledGDP)
+      .data(scaledGDP)// GDP scaled to the height of 400
       .enter()
       .append('rect')
-      .attr('data-date', function (d, i) {
+      .attr('data-date', function (d, i) {//sets the date as an attribute
         return data.data[i][0];
       })
-      .attr('data-gdp', function (d, i) {
+      .attr('data-gdp', function (d, i) {// sets the gdp amount as an attribute
         return data.data[i][1];
       })
       .attr('class', 'bar')
+      
+      //pushes each rect a little bit more to the right with each change in year
       .attr('x', function (d, i) {
         return xScale(yearsDate[i]);
       })
+      
+      //as y is calculated from the top right you want to push everything down to the bottom . so that is why you put height --
+      //and the -d is to stop pushing it down to much and have the  height of the data
       .attr('y', function (d) {
         return height - d;
       })
-      .attr('width', barWidth)
-      .attr('height', function (d) {
+      .attr('width', barWidth)// defined on top as width / 275
+      .attr('height', function (d) {//adding more than d here will make it grow at te bottom bc again height is calculated from the top
         return d;
       })
       .style('fill', '#33adff')
-      .attr('transform', 'translate(60, 0)')
+      .attr('transform', 'translate(60, 0)')//pushes graph a little right
       .on('mouseover', function (d, i) {
         overlay
           .transition()
-          .duration(1)
+          .duration(1)// time for white bar to appear on screen
           .style('height', d + 'px')
           .style('width', barWidth + 'px')
           .style('opacity', 0.9)
@@ -164,8 +170,8 @@ d3.json(
           .html(
             years[i] +
             '<br>' +
-            '$' +
-            GDP[i].toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') +
+            '$' +// toFixed rounds to 1 number after decimal
+            GDP[i].toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') + //here the regex finds the first digit adds a comma after it then puts the other numbers and then adds billion 
             ' Billion'
           )
           .attr('data-date', data.data[i][0])
